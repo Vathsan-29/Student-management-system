@@ -1,0 +1,98 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Program setup and structures | Student Communication System</title><link rel="stylesheet" href="style.css"></head><body>
+<header class="top"><div class="in"><a class="brand" href="index.html"><span>SCS</span>Student Communication System</a><nav><a href="index.html">Home</a><a href="design.html">Design</a><a href="topics.html" class=on>Topics</a><a href="output.html">Output</a><a href="about.html">About</a></nav></div></header><div class="in lay"><aside><b>Topics</b><a href="setup.html" class=on>Program setup and structures</a><a href="helpers.html">Input helper functions</a><a href="lookup.html">List, tree, hash and graph helpers</a><a href="registration.html">Student registration and display</a><a href="searching.html">Searching a student</a><a href="sorting.html">Sorting student records</a><a href="messaging.html">Messaging, chat history and undo</a><a href="group.html">Study group</a><a href="connections.html">Connections and shortest path</a><a href="notifications.html">Priority notifications</a><a href="hashing.html">Hash table search</a><a href="expressions.html">Expressions and Tower of Hanoi</a><a href="main.html">Clean-up and main function</a></aside><main><h1>Program setup and structures</h1><p class="sub">Header, libraries, structs and global data</p><div class="meta"><div><small>Data structure</small>All structures</div><div><small>Syllabus unit</small>Setup</div><div><small>Menu option</small>-</div></div><p>The file starts with the libraries and constants, then defines one structure for every data structure: Student for the list, TreeNode for the search tree, Message for the queue, Chat for the history, UndoNode for the stack, Member for the group and Notice for the heap. Global pointers and arrays keep the state of the program.</p><h2>Source code</h2><h3>7.1 Program Header, Libraries and Constants</h3><div class="cw"><button class="cp">Copy</button><pre class="code"><code>/*
+ * STUDENT COMMUNICATION SYSTEM
+ * IT23302 - Data Structures Using C
+ * Department of Information Technology, MIT Campus, Anna University
+ *
+ * A menu-driven console program that uses the data structures from the
+ * syllabus to run a small student messaging system.
+ *
+ *   Singly linked list   - student records
+ *   Binary search tree   - student search by ID
+ *   Queue (linked)       - pending (incoming) messages
+ *   Doubly linked list   - chat history
+ *   Stack (linked)       - undo of sent messages
+ *   Circular linked list - study group, speaker rotation
+ *   Graph (adj. matrix) - student connections, BFS, DFS, shortest path
+ *   Max heap             - priority notifications
+ *   Hash table           - quick lookup, linear probing
+ *   Stack (array)        - infix to postfix and postfix evaluation
+ *   Recursion            - Tower of Hanoi
+ *
+ * Compile : gcc student_communication_system.c -o scs
+ * Run     : ./scs
+ */
+
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;ctype.h&gt;
+#include &lt;limits.h&gt;
+
+#define MAX_STUDENTS 50
+#define TABLE_SIZE   101
+#define HEAP_MAX     50
+#define EXPR_MAX     100</code></pre></div><h3>7.2 Structures</h3><div class="cw"><button class="cp">Copy</button><pre class="code"><code> typedef struct Student {              /* node of the student list */
+     int id;
+     char name[50];
+     char dept[30];
+     int year;
+     struct Student *next;
+ } Student;
+
+ typedef struct TreeNode {             /* node of the binary search tree */
+     int id;
+     Student *rec;
+     struct TreeNode *left, *right;
+ } TreeNode;
+
+ typedef struct Message {              /* node of the message queue */
+     int msg_id, sender, receiver;
+     char text[200];
+     struct Message *next;
+ } Message;
+
+ typedef struct Chat {                 /* node of the chat history list */
+     int msg_id, sender, receiver;
+     char text[200];
+
+
+
+
+
+    struct Chat *prev, *next;
+} Chat;
+
+typedef struct UndoNode {              /* node of the undo stack */
+    int msg_id;
+    struct UndoNode *next;
+} UndoNode;
+
+typedef struct Member {                /* node of the group (circular list) */
+    int id;
+    struct Member *next;
+} Member;
+
+typedef struct Notice {                /* one entry of the notification heap */
+    int priority;
+    char text[100];
+} Notice;</code></pre></div><h3>7.3 Global Data</h3><div class="cw"><button class="cp">Copy</button><pre class="code"><code>static Student *head = NULL;                   /* student list             */
+static int       student_count = 0;
+static TreeNode *root = NULL;                  /* BST of student IDs       */
+
+static Message *q_front = NULL, *q_rear = NULL;    /* message queue        */
+static Chat     *chat_head = NULL, *chat_tail = NULL;
+static UndoNode *undo_top = NULL;
+static int       next_msg_id = 1;
+
+static Member    *group_last = NULL;           /* last node of circular list */
+static Member    *group_cur = NULL;            /* current speaker           */
+
+static int graph_ids[MAX_STUDENTS];         /* vertex number -&gt; student ID */
+static int adj[MAX_STUDENTS][MAX_STUDENTS]; /* adjacency matrix            */
+static int vcount = 0;
+
+static Notice heap[HEAP_MAX];                  /* max heap, index from 0    */
+static int    heap_size = 0;
+
+static int hash_table[TABLE_SIZE];             /* 0 means empty slot        */</code></pre></div><div class="pn"><span></span><a class="r" href="helpers.html"><small>Next</small>Input helper functions</a></div></main></div><footer><div class="in">Student Communication System · IT23302 Data Structures Using C · Department of Information Technology, MIT Campus, Anna University<br>Shrivathsan A (2025506074) and Aakash V (2025506138)</div></footer><script src="app.js"></script></body></html>

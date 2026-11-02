@@ -1,0 +1,278 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Messaging, chat history and undo | Student Communication System</title><link rel="stylesheet" href="style.css"></head><body>
+<header class="top"><div class="in"><a class="brand" href="index.html"><span>SCS</span>Student Communication System</a><nav><a href="index.html">Home</a><a href="design.html">Design</a><a href="topics.html" class=on>Topics</a><a href="output.html">Output</a><a href="about.html">About</a></nav></div></header><div class="in lay"><aside><b>Topics</b><a href="setup.html">Program setup and structures</a><a href="helpers.html">Input helper functions</a><a href="lookup.html">List, tree, hash and graph helpers</a><a href="registration.html">Student registration and display</a><a href="searching.html">Searching a student</a><a href="sorting.html">Sorting student records</a><a href="messaging.html" class=on>Messaging, chat history and undo</a><a href="group.html">Study group</a><a href="connections.html">Connections and shortest path</a><a href="notifications.html">Priority notifications</a><a href="hashing.html">Hash table search</a><a href="expressions.html">Expressions and Tower of Hanoi</a><a href="main.html">Clean-up and main function</a></aside><main><h1>Messaging, chat history and undo</h1><p class="sub">Queue, doubly linked list and stack</p><div class="meta"><div><small>Data structure</small>Queue, doubly linked list, stack</div><div><small>Syllabus unit</small>Unit II</div><div><small>Menu option</small>5, 6, 7, 8</div></div><p>Every sent message is stored in three structures: the queue for delivery in arrival order, the doubly linked chat history that can be read in both directions, and the undo stack that takes back the latest message.</p><h2>Algorithm</h2><h3>6.2 Message Queue (FIFO)</h3><p>Messages wait in a linked queue and leave in the same order in which they arrived. ENQUEUE(message) 1. Create a message node, new-&gt;next = NULL 2. If rear == NULL front = rear = new Else rear-&gt;next = new rear = new DEQUEUE() 1. If front == NULL, report "queue empty" and stop 2. temp = front 3. front = front-&gt;next 4. If front == NULL, rear = NULL 5. Deliver the message and free temp</p><pre class="term"></pre><h3>6.3 Undo Using a Stack (LIFO)</h3><p>The ID of every sent message is pushed on a stack, so the latest message is the first one to be undone. PUSH(message_id) 1. Create a stack node 2. node-&gt;next = top 3. top = node POP() 1. If top == NULL, report "nothing to undo" and stop 2. temp = top, top = top-&gt;next 3. Remove the message temp-&gt;msg_id from the queue (if present) 4. Remove the message temp-&gt;msg_id from the chat history 5. Free temp</p><pre class="term"></pre><h2>Source code</h2><h3>7.10 Messaging: Queue, Chat History and Undo (Options 5 to 8)</h3><div class="cw"><button class="cp">Copy</button><pre class="code"><code>static void enqueue_message(Message *m)
+{
+    m-&gt;next = NULL;
+    if (q_rear == NULL)
+        q_front = q_rear = m;
+    else {
+
+
+
+
+
+        q_rear-&gt;next = m;
+        q_rear = m;
+    }
+}
+
+static void send_message(void)
+{
+    int from, to;
+    Message *m;
+    Chat *c;
+    UndoNode *u;
+    char text[200];
+
+    if (student_count &lt; 2) {
+        printf("At least two registered students are needed.\n");
+        return;
+    }
+    from = read_int("Sender ID   : ");
+    if (find_student(from, NULL) == NULL) {
+        printf("Sender is not registered.\n");
+        return;
+    }
+    to = read_int("Receiver ID : ");
+    if (find_student(to, NULL) == NULL) {
+        printf("Receiver is not registered.\n");
+        return;
+    }
+    if (from == to) {
+        printf("You cannot send a message to yourself.\n");
+        return;
+    }
+    read_line("Message     : ", text, sizeof text);
+    if (text[0] == '\0') {
+        printf("Message cannot be empty.\n");
+        return;
+    }
+
+    /* 1. put the message in the queue */
+    m = (Message *)safe_malloc(sizeof(Message));
+    m-&gt;msg_id = next_msg_id;
+    m-&gt;sender = from;
+    m-&gt;receiver = to;
+    strcpy(m-&gt;text, text);
+    enqueue_message(m);
+
+    /* 2. add it to the end of the chat history */
+    c = (Chat *)safe_malloc(sizeof(Chat));
+    c-&gt;msg_id = next_msg_id;
+    c-&gt;sender = from;
+    c-&gt;receiver = to;
+    strcpy(c-&gt;text, text);
+    c-&gt;next = NULL;
+    c-&gt;prev = chat_tail;
+    if (chat_tail == NULL)
+         chat_head = c;
+    else
+         chat_tail-&gt;next = c;
+    chat_tail = c;
+
+    /* 3. push it on the undo stack */
+    u = (UndoNode *)safe_malloc(sizeof(UndoNode));
+    u-&gt;msg_id = next_msg_id;
+    u-&gt;next = undo_top;
+    undo_top = u;
+
+    printf("Message %d sent from %s to %s.\n", next_msg_id,
+           student_name(from), student_name(to));
+    next_msg_id++;
+}
+
+
+
+
+
+static void view_incoming(void)
+{
+    Message *t, *m;
+    int choice, n = 0;
+
+    if (q_front == NULL) {
+        printf("No pending messages.\n");
+        return;
+    }
+    printf("\n 1. Show pending messages\n");
+    printf(" 2. Deliver the oldest message\n");
+    choice = read_int("Enter your choice: ");
+
+    if (choice == 1) {
+        for (t = q_front; t != NULL; t = t-&gt;next) {
+             n++;
+             printf(" %d. [Msg %d] %s -&gt; %s : %s\n", n, t-&gt;msg_id,
+                    student_name(t-&gt;sender), student_name(t-&gt;receiver), t-&gt;text);
+        }
+        printf("Pending messages: %d\n", n);
+    } else if (choice == 2) {
+        m = q_front;                         /* dequeue */
+        q_front = q_front-&gt;next;
+        if (q_front == NULL)
+             q_rear = NULL;
+        printf("Delivered to %s: \"%s\" (from %s)\n",
+                student_name(m-&gt;receiver), m-&gt;text, student_name(m-&gt;sender));
+        free(m);
+    } else {
+        printf("Invalid choice.\n");
+    }
+}
+
+static void view_chat_history(void)
+{
+    Chat *t;
+    int a, choice, shown = 0;
+
+    if (chat_head == NULL) {
+        printf("No messages in the chat history.\n");
+        return;
+    }
+    a = read_int("Enter a student ID to see only their chats (0 for all): ");
+    printf(" 1. Oldest first\n 2. Newest first\n");
+    choice = read_int("Enter your choice: ");
+    if (choice != 1 &amp;&amp; choice != 2) {
+        printf("Invalid choice.\n");
+        return;
+    }
+
+    t = (choice == 1) ? chat_head : chat_tail;
+    while (t != NULL) {
+        if (a == 0 || t-&gt;sender == a || t-&gt;receiver == a) {
+            printf(" [Msg %d] %s -&gt; %s : %s\n", t-&gt;msg_id,
+                    student_name(t-&gt;sender), student_name(t-&gt;receiver), t-&gt;text);
+            shown++;
+        }
+        t = (choice == 1) ? t-&gt;next : t-&gt;prev;
+    }
+    if (shown == 0)
+        printf("No messages found for this student.\n");
+}
+
+static void undo_message(void)
+{
+    UndoNode *u;
+    Message *m, *prev = NULL;
+    Chat *c;
+
+
+
+
+
+    int id, in_queue = 0;
+
+    if (undo_top == NULL) {
+        printf("Nothing to undo.\n");
+        return;
+    }
+    u = undo_top;                           /* pop */
+    undo_top = u-&gt;next;
+    id = u-&gt;msg_id;
+    free(u);
+
+    /* remove from the queue if it is still waiting there */
+    for (m = q_front; m != NULL; prev = m, m = m-&gt;next) {
+        if (m-&gt;msg_id == id) {
+            if (prev == NULL)
+                 q_front = m-&gt;next;
+            else
+                 prev-&gt;next = m-&gt;next;
+            if (m == q_rear)
+                 q_rear = prev;
+            free(m);
+            in_queue = 1;
+            break;
+        }
+    }
+
+    /* remove from the chat history */
+    for (c = chat_tail; c != NULL; c = c-&gt;prev) {
+        if (c-&gt;msg_id == id) {
+            if (c-&gt;prev == NULL)
+                 chat_head = c-&gt;next;
+            else
+                 c-&gt;prev-&gt;next = c-&gt;next;
+            if (c-&gt;next == NULL)
+                 chat_tail = c-&gt;prev;
+            else
+                 c-&gt;next-&gt;prev = c-&gt;prev;
+            free(c);
+            break;
+        }
+    }
+
+    if (in_queue)
+         printf("Message %d was undone and removed from the pending queue.\n", id);
+    else
+         printf("Message %d was undone (it was already delivered).\n", id);
+}</code></pre></div><h2>Sample output</h2><h3>Output 5: Sending, delivering and viewing messages</h3><p>Three messages are sent. They wait in the queue, the oldest one is delivered, and the chat history is shown in both directions.</p><pre class="term">Enter your choice: 5
+Sender ID   : 78
+Receiver ID : 202
+Message     : Hello Arun, are you ready for the lab?
+Message 1 sent from Sahana to Arun S.
+
+Enter your choice: 5
+Sender ID   : 202
+Receiver ID : 78
+Message     : Yes, I am ready.
+Message 2 sent from Arun S to Sahana.
+
+
+
+
+
+Enter your choice: 5
+Sender ID   : 74
+Receiver ID : 138
+Message     : Send me the report draft please.
+Message 3 sent from Shrivathsan A to Aakash V.
+
+Enter your choice: 6
+
+  1. Show pending messages
+  2. Deliver the oldest message
+Enter your choice: 1
+  1. [Msg 1] Sahana -&gt; Arun S : Hello Arun, are you ready for the lab?
+  2. [Msg 2] Arun S -&gt; Sahana : Yes, I am ready.
+  3. [Msg 3] Shrivathsan A -&gt; Aakash V : Send me the report draft please.
+Pending messages: 3
+
+Enter your choice: 6
+
+  1. Show pending messages
+  2. Deliver the oldest message
+Enter your choice: 2
+Delivered to Arun S: "Hello Arun, are you ready for the lab?" (from Sahana)
+
+Enter your choice: 7
+Enter a student ID to see only their chats (0 for all): 0
+  1. Oldest first
+  2. Newest first
+Enter your choice: 1
+  [Msg 1] Sahana -&gt; Arun S : Hello Arun, are you ready for the lab?
+  [Msg 2] Arun S -&gt; Sahana : Yes, I am ready.
+  [Msg 3] Shrivathsan A -&gt; Aakash V : Send me the report draft please.
+
+Enter your choice: 7
+Enter a student ID to see only their chats (0 for all): 78
+  1. Oldest first
+  2. Newest first
+Enter your choice: 2
+  [Msg 2] Arun S -&gt; Sahana : Yes, I am ready.
+  [Msg 1] Sahana -&gt; Arun S : Hello Arun, are you ready for the lab?</pre><h3>Output 6: Undo of the most recent messages</h3><p>Messages are undone one after another, the latest first. After the third undo, the stack is empty.</p><pre class="term">Enter your choice: 8
+Message 3 was undone and removed from the pending queue.
+
+Enter your choice: 7
+Enter a student ID to see only their chats (0 for all): 0
+  1. Oldest first
+  2. Newest first
+Enter your choice: 1
+  [Msg 1] Sahana -&gt; Arun S : Hello Arun, are you ready for the lab?
+  [Msg 2] Arun S -&gt; Sahana : Yes, I am ready.
+
+Enter your choice: 8
+Message 2 was undone and removed from the pending queue.
+
+Enter your choice: 8
+Message 1 was undone and removed from the pending queue.
+
+Enter your choice: 8
+Nothing to undo.</pre><div class="pn"><a href="sorting.html"><small>Previous</small>Sorting student records</a><a class="r" href="group.html"><small>Next</small>Study group</a></div></main></div><footer><div class="in">Student Communication System · IT23302 Data Structures Using C · Department of Information Technology, MIT Campus, Anna University<br>Shrivathsan A (2025506074) and Aakash V (2025506138)</div></footer><script src="app.js"></script></body></html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Connections and shortest path | Student Communication System</title><link rel="stylesheet" href="style.css"></head><body>
+<header class="top"><div class="in"><a class="brand" href="index.html"><span>SCS</span>Student Communication System</a><nav><a href="index.html">Home</a><a href="design.html">Design</a><a href="topics.html" class=on>Topics</a><a href="output.html">Output</a><a href="about.html">About</a></nav></div></header><div class="in lay"><aside><b>Topics</b><a href="setup.html">Program setup and structures</a><a href="helpers.html">Input helper functions</a><a href="lookup.html">List, tree, hash and graph helpers</a><a href="registration.html">Student registration and display</a><a href="searching.html">Searching a student</a><a href="sorting.html">Sorting student records</a><a href="messaging.html">Messaging, chat history and undo</a><a href="group.html">Study group</a><a href="connections.html" class=on>Connections and shortest path</a><a href="notifications.html">Priority notifications</a><a href="hashing.html">Hash table search</a><a href="expressions.html">Expressions and Tower of Hanoi</a><a href="main.html">Clean-up and main function</a></aside><main><h1>Connections and shortest path</h1><p class="sub">Graph with BFS and DFS</p><div class="meta"><div><small>Data structure</small>Graph (adjacency matrix)</div><div><small>Syllabus unit</small>Unit IV</div><div><small>Menu option</small>10, 11</div></div><p>Students are vertices and connections are edges in an adjacency matrix. BFS and DFS traverse the network, and BFS finds the shortest connection path using a parent array.</p><h2>Algorithm</h2><h3>6.5 Shortest Connection Path Using BFS</h3><p>Breadth-first search reaches students level by level, so the first path found to the target is the shortest. FIND_PATH(a, b) 1. Mark all students unvisited, parent[all] = -1 2. Mark a visited and add a to the queue 3. While queue is not empty and b is not visited v = remove from queue For each unvisited student i connected to v Mark i visited, parent[i] = v Add i to the queue 4. If b is not visited, print "no path" and stop 5. Walk from b back to a using parent[] and print the path</p><pre class="term"></pre><h2>Source code</h2><h3>7.12 Student Connections and Shortest Path (Options 10 and 11)</h3><div class="cw"><button class="cp">Copy</button><pre class="code"><code>static void dfs_visit(int v, int visited[])
+{
+    int i;
+    visited[v] = 1;
+    printf("%s ", student_name(graph_ids[v]));
+    for (i = 0; i &lt; vcount; i++)
+        if (adj[v][i] &amp;&amp; !visited[i])
+            dfs_visit(i, visited);
+}
+
+static void manage_connections(void)
+{
+    int choice, a, b, i, j, found;
+    int visited[MAX_STUDENTS] = {0};
+
+    if (vcount &lt; 2) {
+        printf("At least two registered students are needed.\n");
+        return;
+    }
+    printf("\n 1. Add a connection\n 2. Display all connections\n");
+    printf(" 3. BFS traversal from a student\n");
+    printf(" 4. DFS traversal from a student\n");
+    choice = read_int("Enter your choice: ");
+
+    if (choice == 1) {
+        a = graph_index(read_int("First student ID : "));
+        b = graph_index(read_int("Second student ID : "));
+        if (a &lt; 0 || b &lt; 0)
+            printf("Both students must be registered.\n");
+        else if (a == b)
+            printf("A student cannot connect to themselves.\n");
+        else if (adj[a][b])
+            printf("These students are already connected.\n");
+        else {
+            adj[a][b] = adj[b][a] = 1;
+            printf("%s and %s are now connected.\n",
+                   student_name(graph_ids[a]), student_name(graph_ids[b]));
+        }
+    } else if (choice == 2) {
+        for (i = 0; i &lt; vcount; i++) {
+            printf(" %s :", student_name(graph_ids[i]));
+            found = 0;
+            for (j = 0; j &lt; vcount; j++)
+                if (adj[i][j]) {
+                    printf(" %s,", student_name(graph_ids[j]));
+                    found = 1;
+                }
+            if (!found)
+                printf(" (no connections)");
+            printf("\n");
+        }
+    } else if (choice == 3) {
+        int queue[MAX_STUDENTS], front = 0, rear = 0, v;
+
+        a = graph_index(read_int("Start student ID: "));
+        if (a &lt; 0) {
+            printf("Student is not registered.\n");
+            return;
+        }
+        visited[a] = 1;
+
+
+
+
+
+        queue[rear++] = a;
+        printf("BFS order: ");
+        while (front &lt; rear) {
+             v = queue[front++];
+             printf("%s ", student_name(graph_ids[v]));
+             for (i = 0; i &lt; vcount; i++)
+                 if (adj[v][i] &amp;&amp; !visited[i]) {
+                     visited[i] = 1;
+                     queue[rear++] = i;
+                 }
+        }
+        printf("\n");
+    } else if (choice == 4) {
+        a = graph_index(read_int("Start student ID: "));
+        if (a &lt; 0) {
+             printf("Student is not registered.\n");
+             return;
+        }
+        printf("DFS order: ");
+        dfs_visit(a, visited);
+        printf("\n");
+    } else {
+        printf("Invalid choice.\n");
+    }
+}
+
+static void find_connection_path(void)
+{
+    int a, b, i, v, front = 0, rear = 0;
+    int queue[MAX_STUDENTS], parent[MAX_STUDENTS], visited[MAX_STUDENTS] = {0};
+    int path[MAX_STUDENTS], len = 0;
+
+    if (vcount &lt; 2) {
+        printf("At least two registered students are needed.\n");
+        return;
+    }
+    a = graph_index(read_int("From student ID: "));
+    b = graph_index(read_int("To student ID : "));
+    if (a &lt; 0 || b &lt; 0) {
+        printf("Both students must be registered.\n");
+        return;
+    }
+
+    for (i = 0; i &lt; vcount; i++)
+        parent[i] = -1;
+    visited[a] = 1;
+    queue[rear++] = a;
+    while (front &lt; rear &amp;&amp; !visited[b]) {       /* BFS gives shortest path */
+        v = queue[front++];
+        for (i = 0; i &lt; vcount; i++)
+            if (adj[v][i] &amp;&amp; !visited[i]) {
+                visited[i] = 1;
+                parent[i] = v;
+                queue[rear++] = i;
+            }
+    }
+
+    if (!visited[b]) {
+        printf("No connection path exists between these students.\n");
+        return;
+    }
+    for (v = b; v != -1; v = parent[v])         /* walk back to the start */
+        path[len++] = v;
+
+    printf("Shortest path (%d step(s)): ", len - 1);
+    for (i = len - 1; i &gt;= 0; i--) {
+        printf("%s", student_name(graph_ids[path[i]]));
+        if (i &gt; 0)
+            printf(" -&gt; ");
+
+
+
+
+
+     }
+     printf("\n");
+ }</code></pre></div><h2>Sample output</h2><h3>Output 8: Student connections and shortest path</h3><p>Connections are added, the network is displayed, BFS and DFS are run, and the shortest path from Sahana to Aakash V is found.</p><pre class="term">Enter your choice: 10
+
+  1. Add a connection
+  2. Display all connections
+  3. BFS traversal from a student
+  4. DFS traversal from a student
+Enter your choice: 1
+First student ID : 78
+Second student ID : 202
+Sahana and Arun S are now connected.
+
+Enter your choice: 10
+
+  1. Add a connection
+  2. Display all connections
+  3. BFS traversal from a student
+  4. DFS traversal from a student
+Enter your choice: 1
+First student ID : 202
+Second student ID : 74
+Arun S and Shrivathsan A are now connected.
+
+Enter your choice: 10
+
+  1. Add a connection
+  2. Display all connections
+  3. BFS traversal from a student
+  4. DFS traversal from a student
+Enter your choice: 1
+First student ID : 74
+Second student ID : 138
+Shrivathsan A and Aakash V are now connected.
+
+Enter your choice: 10
+
+  1. Add a connection
+  2. Display all connections
+  3. BFS traversal from a student
+  4. DFS traversal from a student
+Enter your choice: 1
+First student ID : 78
+Second student ID : 74
+Sahana and Shrivathsan A are now connected.
+
+Enter your choice: 10
+
+  1. Add a connection
+  2. Display all connections
+  3. BFS traversal from a student
+  4. DFS traversal from a student
+Enter your choice: 2
+  Sahana : Arun S, Shrivathsan A,
+  Arun S : Sahana, Shrivathsan A,
+  Shrivathsan A : Sahana, Arun S, Aakash V,
+  Aakash V : Shrivathsan A,
+
+Enter your choice: 10
+
+
+
+
+
+  1. Add a connection
+  2. Display all connections
+  3. BFS traversal from a student
+  4. DFS traversal from a student
+Enter your choice: 3
+Start student ID: 78
+BFS order: Sahana Arun S Shrivathsan A         Aakash V
+
+Enter your choice: 10
+
+  1. Add a connection
+  2. Display all connections
+  3. BFS traversal from a student
+  4. DFS traversal from a student
+Enter your choice: 4
+Start student ID: 78
+DFS order: Sahana Arun S Shrivathsan A         Aakash V
+
+Enter your choice: 11
+From student ID: 78
+To student ID : 138
+Shortest path (2 step(s)): Sahana -&gt; Shrivathsan A -&gt; Aakash V</pre><div class="pn"><a href="group.html"><small>Previous</small>Study group</a><a class="r" href="notifications.html"><small>Next</small>Priority notifications</a></div></main></div><footer><div class="in">Student Communication System · IT23302 Data Structures Using C · Department of Information Technology, MIT Campus, Anna University<br>Shrivathsan A (2025506074) and Aakash V (2025506138)</div></footer><script src="app.js"></script></body></html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Priority notifications | Student Communication System</title><link rel="stylesheet" href="style.css"></head><body>
+<header class="top"><div class="in"><a class="brand" href="index.html"><span>SCS</span>Student Communication System</a><nav><a href="index.html">Home</a><a href="design.html">Design</a><a href="topics.html" class=on>Topics</a><a href="output.html">Output</a><a href="about.html">About</a></nav></div></header><div class="in lay"><aside><b>Topics</b><a href="setup.html">Program setup and structures</a><a href="helpers.html">Input helper functions</a><a href="lookup.html">List, tree, hash and graph helpers</a><a href="registration.html">Student registration and display</a><a href="searching.html">Searching a student</a><a href="sorting.html">Sorting student records</a><a href="messaging.html">Messaging, chat history and undo</a><a href="group.html">Study group</a><a href="connections.html">Connections and shortest path</a><a href="notifications.html" class=on>Priority notifications</a><a href="hashing.html">Hash table search</a><a href="expressions.html">Expressions and Tower of Hanoi</a><a href="main.html">Clean-up and main function</a></aside><main><h1>Priority notifications</h1><p class="sub">Binary max heap</p><div class="meta"><div><small>Data structure</small>Binary max heap</div><div><small>Syllabus unit</small>Unit III</div><div><small>Menu option</small>12</div></div><p>Notifications have a priority from 1 to 10. The heap keeps the highest priority at the top, so the most urgent notification is always given out first.</p><h2>Algorithm</h2><h3>6.6 Priority Notifications Using a Max Heap</h3><p>The heap always keeps the highest priority at the top, so the most urgent notification is given out first. INSERT_HEAP(value) 1. Place value at the end of the heap, i = last index 2. While i &gt; 0 and heap[parent(i)] &lt; heap[i] Swap heap[parent(i)] and heap[i] i = parent(i) EXTRACT_MAX() 1. top = heap[0] 2. Move the last element to heap[0] and reduce the size by 1 3. i = 0 4. While heap[i] has a child child = the larger of the two children If heap[i] &gt;= heap[child], stop Swap heap[i] and heap[child], i = child 5. Return top</p><pre class="term"></pre><h2>Source code</h2><h3>7.13 Priority Notifications (Option 12)</h3><div class="cw"><button class="cp">Copy</button><pre class="code"><code> static void heap_insert(int priority, const char *text)
+ {
+     int i = heap_size++;
+     Notice tmp;
+
+     heap[i].priority = priority;
+     strcpy(heap[i].text, text);
+     while (i &gt; 0 &amp;&amp; heap[(i - 1) / 2].priority &lt; heap[i].priority) {
+         tmp = heap[i];
+         heap[i] = heap[(i - 1) / 2];
+         heap[(i - 1) / 2] = tmp;
+         i = (i - 1) / 2;
+     }
+ }
+
+ static Notice heap_extract_max(void)
+ {
+     Notice top = heap[0], tmp;
+     int i = 0, child;
+
+     heap[0] = heap[--heap_size];
+     while (1) {
+         child = 2 * i + 1;
+         if (child &gt;= heap_size)
+             break;
+         if (child + 1 &lt; heap_size &amp;&amp; heap[child + 1].priority &gt; heap[child].priority)
+             child++;
+         if (heap[i].priority &gt;= heap[child].priority)
+             break;
+         tmp = heap[i];
+         heap[i] = heap[child];
+         heap[child] = tmp;
+         i = child;
+     }
+     return top;
+ }
+
+ static void manage_notifications(void)
+ {
+     int choice, p, i;
+     char text[100];
+     Notice n;
+
+     printf("\n 1. Add a notification\n");
+     printf(" 2. Read the most urgent notification\n");
+     printf(" 3. Show all notifications (heap order)\n");
+     choice = read_int("Enter your choice: ");
+
+     if (choice == 1) {
+         if (heap_size &gt;= HEAP_MAX) {
+             printf("Notification box is full.\n");
+             return;
+         }
+         read_line("Notification text: ", text, sizeof text);
+         if (text[0] == '\0') {
+             printf("Text cannot be empty.\n");
+             return;
+         }
+         p = read_int("Priority (1 = low, 10 = very urgent): ");
+         if (p &lt; 1 || p &gt; 10) {
+             printf("Priority must be between 1 and 10.\n");
+             return;
+         }
+
+
+
+
+
+        heap_insert(p, text);
+        printf("Notification added.\n");
+    } else if (choice == 2) {
+        if (heap_size == 0) {
+             printf("No notifications.\n");
+             return;
+        }
+        n = heap_extract_max();
+        printf("Most urgent (priority %d): %s\n", n.priority, n.text);
+    } else if (choice == 3) {
+        if (heap_size == 0) {
+             printf("No notifications.\n");
+             return;
+        }
+        for (i = 0; i &lt; heap_size; i++)
+             printf(" [%d] priority %d : %s\n", i, heap[i].priority, heap[i].text);
+    } else {
+        printf("Invalid choice.\n");
+    }
+}</code></pre></div><h2>Sample output</h2><h3>Output 9: Priority notifications using a max heap</h3><p>Three notifications are added. They come out in the order of their priority, not in the order they were added.</p><pre class="term">Enter your choice: 12
+
+  1. Add a notification
+  2. Read the most urgent notification
+  3. Show all notifications (heap order)
+Enter your choice: 1
+Notification text: Fee payment last date tomorrow
+Priority (1 = low, 10 = very urgent): 6
+Notification added.
+
+Enter your choice: 12
+
+  1. Add a notification
+  2. Read the most urgent notification
+  3. Show all notifications (heap order)
+Enter your choice: 1
+Notification text: Lab record submission on Friday
+Priority (1 = low, 10 = very urgent): 9
+Notification added.
+
+Enter your choice: 12
+
+  1. Add a notification
+  2. Read the most urgent notification
+  3. Show all notifications (heap order)
+Enter your choice: 1
+Notification text: Library book return
+Priority (1 = low, 10 = very urgent): 3
+Notification added.
+
+Enter your choice: 12
+
+  1. Add a notification
+  2. Read the most urgent notification
+  3. Show all notifications (heap order)
+Enter your choice: 3
+  [0] priority 9 : Lab record submission on Friday
+  [1] priority 6 : Fee payment last date tomorrow
+  [2] priority 3 : Library book return
+
+Enter your choice: 12
+
+  1. Add a notification
+
+
+
+
+  2. Read the most urgent notification
+  3. Show all notifications (heap order)
+Enter your choice: 2
+Most urgent (priority 9): Lab record submission on Friday
+
+Enter your choice: 12
+
+  1. Add a notification
+  2. Read the most urgent notification
+  3. Show all notifications (heap order)
+Enter your choice: 2
+Most urgent (priority 6): Fee payment last date tomorrow</pre><div class="pn"><a href="connections.html"><small>Previous</small>Connections and shortest path</a><a class="r" href="hashing.html"><small>Next</small>Hash table search</a></div></main></div><footer><div class="in">Student Communication System · IT23302 Data Structures Using C · Department of Information Technology, MIT Campus, Anna University<br>Shrivathsan A (2025506074) and Aakash V (2025506138)</div></footer><script src="app.js"></script></body></html>

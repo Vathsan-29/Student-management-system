@@ -1,0 +1,148 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Student registration and display | Student Communication System</title><link rel="stylesheet" href="style.css"></head><body>
+<header class="top"><div class="in"><a class="brand" href="index.html"><span>SCS</span>Student Communication System</a><nav><a href="index.html">Home</a><a href="design.html">Design</a><a href="topics.html" class=on>Topics</a><a href="output.html">Output</a><a href="about.html">About</a></nav></div></header><div class="in lay"><aside><b>Topics</b><a href="setup.html">Program setup and structures</a><a href="helpers.html">Input helper functions</a><a href="lookup.html">List, tree, hash and graph helpers</a><a href="registration.html" class=on>Student registration and display</a><a href="searching.html">Searching a student</a><a href="sorting.html">Sorting student records</a><a href="messaging.html">Messaging, chat history and undo</a><a href="group.html">Study group</a><a href="connections.html">Connections and shortest path</a><a href="notifications.html">Priority notifications</a><a href="hashing.html">Hash table search</a><a href="expressions.html">Expressions and Tower of Hanoi</a><a href="main.html">Clean-up and main function</a></aside><main><h1>Student registration and display</h1><p class="sub">Option 1 and option 2</p><div class="meta"><div><small>Data structure</small>Singly linked list</div><div><small>Syllabus unit</small>Unit II</div><div><small>Menu option</small>1, 2</div></div><p>A student is checked, added at the end of the singly linked list, and then inserted into the search tree, the hash table and the graph so all structures stay in step.</p><h2>Algorithm</h2><h3>6.1 Student Registration (Singly Linked List)</h3><p>A new student is added at the end of the list. The same record is then inserted into the search tree, the hash table and the graph. INSERT_STUDENT(head, data) 1. Create new node 2. If memory is not available, report error and stop 3. Copy data into the new node 4. new-&gt;next = NULL 5. If head == NULL head = new Else temp = head While temp-&gt;next != NULL temp = temp-&gt;next temp-&gt;next = new 6. Return head</p><pre class="term"></pre><h2>Source code</h2><h3>7.6 Student Registration (Option 1)</h3><div class="cw"><button class="cp">Copy</button><pre class="code"><code>static void register_student(void)
+{
+    Student *n, *t;
+    int id, year, i, j;
+
+    if (student_count &gt;= MAX_STUDENTS) {
+        printf("Student limit (%d) reached.\n", MAX_STUDENTS);
+        return;
+    }
+
+    id = read_int("Enter student ID (positive number): ");
+    if (id &lt;= 0) {
+        printf("ID must be greater than zero.\n");
+        return;
+    }
+    if (find_student(id, NULL) != NULL) {
+        printf("A student with this ID already exists.\n");
+        return;
+    }
+
+    n = (Student *)safe_malloc(sizeof(Student));
+    n-&gt;id = id;
+    read_line("Enter name           : ", n-&gt;name, sizeof n-&gt;name);
+    read_line("Enter department     : ", n-&gt;dept, sizeof n-&gt;dept);
+    if (n-&gt;name[0] == '\0' || n-&gt;dept[0] == '\0') {
+        printf("Name and department cannot be empty.\n");
+        free(n);
+        return;
+    }
+    year = read_int("Enter year (1-4)     : ");
+    if (year &lt; 1 || year &gt; 4) {
+        printf("Year must be between 1 and 4.\n");
+        free(n);
+        return;
+    }
+    n-&gt;year = year;
+    n-&gt;next = NULL;
+
+    /* insert at the end of the singly linked list */
+    if (head == NULL) {
+        head = n;
+    } else {
+        t = head;
+        while (t-&gt;next != NULL)
+             t = t-&gt;next;
+        t-&gt;next = n;
+    }
+    student_count++;
+
+
+
+
+
+    /* keep the other structures in step with the list */
+    root = bst_insert(root, n);
+    hash_insert(id);
+    i = vcount++;
+    graph_ids[i] = id;
+    for (j = 0; j &lt; MAX_STUDENTS; j++)
+        adj[i][j] = adj[j][i] = 0;
+
+    printf("Student registered successfully.\n");
+}</code></pre></div><h3>7.7 Display Student Details (Option 2)</h3><div class="cw"><button class="cp">Copy</button><pre class="code"><code>static void display_students(void)
+{
+    Student *t = head;
+
+    if (t == NULL) {
+        printf("No students registered yet.\n");
+        return;
+    }
+    line('-', 70);
+    printf("%-12s %-20s %-24s %-4s\n", "ID", "NAME", "DEPARTMENT", "YEAR");
+    line('-', 70);
+    while (t != NULL) {
+        printf("%-12d %-20s %-24s %-4d\n", t-&gt;id, t-&gt;name, t-&gt;dept, t-&gt;year);
+        t = t-&gt;next;
+    }
+    line('-', 70);
+    printf("Total students: %d\n", student_count);
+}</code></pre></div><h2>Sample output</h2><h3>Output 1: Main menu and student registration</h3><p>The main menu, followed by the registration of four students and the student table.</p><pre class="term">========================================
+     STUDENT COMMUNICATION SYSTEM
+========================================
+ 1. Student Registration
+ 2. Display Student Details
+ 3. Search Student
+ 4. Sort Student Records
+ 5. Send Message
+ 6. View Incoming Messages
+ 7. View Chat History
+ 8. Undo Recent Message
+ 9. Manage Student Groups
+10. Student Connections
+11. Find Connection Path
+12. Priority Notifications
+13. Hash Table Search
+14. Stack / Expression Demonstration
+ 0. Exit
+----------------------------------------
+Enter your choice: 1
+Enter student ID (positive number): 78
+Enter name            : Sahana
+Enter department      : Information Technology
+Enter year (1-4)      : 2
+Student registered successfully.
+
+Enter your choice: 1
+Enter student ID (positive number): 202
+Enter name           : Arun S
+Enter department     : Information Technology
+Enter year (1-4)     : 2
+Student registered successfully.
+
+Enter your choice: 1
+Enter student ID (positive number): 74
+Enter name           : Shrivathsan A
+Enter department     : Information Technology
+Enter year (1-4)     : 2
+Student registered successfully.
+
+Enter your choice: 1
+Enter student ID (positive number): 138
+Enter name           : Aakash V
+Enter department     : Information Technology
+Enter year (1-4)     : 2
+Student registered successfully.
+
+Enter your choice: 2
+----------------------------------------------------------------------
+ID           NAME                 DEPARTMENT               YEAR
+----------------------------------------------------------------------
+78           Sahana               Information Technology   2
+202          Arun S               Information Technology   2
+74           Shrivathsan A        Information Technology   2
+138          Aakash V             Information Technology   2
+----------------------------------------------------------------------
+Total students: 4</pre><h3>Output 2: Duplicate ID and wrong year (input checking)</h3><p>The program refuses a repeated ID and a wrong year, and asks again when letters are typed instead of a number.</p><pre class="term">Enter your choice: 1
+Enter student ID (positive number): 78
+A student with this ID already exists.
+
+Enter your choice: 1
+Enter student ID (positive number): 150
+Enter name           : Test Student
+Enter department     : IT
+Enter year (1-4)     : abc
+Please enter a valid number.
+Enter year (1-4)     : 7
+Year must be between 1 and 4.</pre><div class="pn"><a href="lookup.html"><small>Previous</small>List, tree, hash and graph helpers</a><a class="r" href="searching.html"><small>Next</small>Searching a student</a></div></main></div><footer><div class="in">Student Communication System · IT23302 Data Structures Using C · Department of Information Technology, MIT Campus, Anna University<br>Shrivathsan A (2025506074) and Aakash V (2025506138)</div></footer><script src="app.js"></script></body></html>

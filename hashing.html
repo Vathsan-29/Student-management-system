@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hash table search | Student Communication System</title><link rel="stylesheet" href="style.css"></head><body>
+<header class="top"><div class="in"><a class="brand" href="index.html"><span>SCS</span>Student Communication System</a><nav><a href="index.html">Home</a><a href="design.html">Design</a><a href="topics.html" class=on>Topics</a><a href="output.html">Output</a><a href="about.html">About</a></nav></div></header><div class="in lay"><aside><b>Topics</b><a href="setup.html">Program setup and structures</a><a href="helpers.html">Input helper functions</a><a href="lookup.html">List, tree, hash and graph helpers</a><a href="registration.html">Student registration and display</a><a href="searching.html">Searching a student</a><a href="sorting.html">Sorting student records</a><a href="messaging.html">Messaging, chat history and undo</a><a href="group.html">Study group</a><a href="connections.html">Connections and shortest path</a><a href="notifications.html">Priority notifications</a><a href="hashing.html" class=on>Hash table search</a><a href="expressions.html">Expressions and Tower of Hanoi</a><a href="main.html">Clean-up and main function</a></aside><main><h1>Hash table search</h1><p class="sub">Division method with linear probing</p><div class="meta"><div><small>Data structure</small>Hash table</div><div><small>Syllabus unit</small>Unit V</div><div><small>Menu option</small>13</div></div><p>A student ID goes to slot ID % 101. A colliding key is placed in the next free slot, and the table view marks every collision.</p><h2>Algorithm</h2><h3>6.7 Hashing Using the Division Method and Linear Probing</h3><p>A colliding key is placed in the next free slot of the table. HASH(key) = key % TABLE_SIZE                      (TABLE_SIZE = 101) INSERT(key) 1. index = HASH(key) 2. While table[index] is occupied index = (index + 1) % TABLE_SIZE 3. table[index] = key SEARCH(key) 1. index = HASH(key) 2. While table[index] is occupied If table[index] == key, return index index = (index + 1) % TABLE_SIZE 3. Return NOT_FOUND</p><pre class="term"></pre><h2>Source code</h2><h3>7.14 Hash Table Search (Option 13)</h3><div class="cw"><button class="cp">Copy</button><pre class="code"><code>static void hash_menu(void)
+{
+    int choice, id, slot, probes, i, shown = 0;
+
+    printf("\n 1. Search a student ID using the hash table\n");
+    printf(" 2. Show the hash table\n");
+    choice = read_int("Enter your choice: ");
+
+    if (choice == 1) {
+        id = read_int("Enter student ID: ");
+        slot = hash_search(id, &amp;probes);
+        if (slot &gt;= 0)
+             printf("Found in slot %d after %d probe(s): %s\n",
+                    slot, probes, student_name(id));
+        else
+             printf("Not found (%d probe(s) made).\n", probes);
+    } else if (choice == 2) {
+        printf(" TABLE SIZE = %d, hash(key) = key %% %d\n", TABLE_SIZE, TABLE_SIZE);
+        for (i = 0; i &lt; TABLE_SIZE; i++)
+             if (hash_table[i] != 0) {
+                 printf(" slot %3d : %-12d %-18s home slot %d%s\n", i,
+                        hash_table[i], student_name(hash_table[i]),
+                        hash_table[i] % TABLE_SIZE,
+                        (hash_table[i] % TABLE_SIZE != i) ? " (collision)" : "");
+                 shown++;
+             }
+        if (shown == 0)
+             printf(" The table is empty.\n");
+    } else {
+        printf("Invalid choice.\n");
+    }
+}</code></pre></div><h2>Sample output</h2><h3>Output 10: Hash table with linear probing</h3><p>Each student ID goes to its own slot, so no collision occurs and the search needs only one probe.</p><pre class="term">Enter your choice: 13
+
+  1. Search a student ID using the hash table
+  2. Show the hash table
+Enter your choice: 1
+Enter student ID: 202
+Found in slot 0 after 1 probe(s): Arun S
+
+Enter your choice: 13
+
+  1. Search a student ID using the hash table
+  2. Show the hash table
+Enter your choice: 1
+Enter student ID: 5
+Not found (1 probe(s) made).
+
+Enter your choice: 13
+
+  1. Search a student ID using the hash table
+  2. Show the hash table
+Enter your choice: 2
+  TABLE SIZE = 101, hash(key) = key % 101
+  slot   0 : 202          Arun S              home slot 0
+  slot 37 : 138           Aakash V            home slot 37
+  slot 74 : 74            Shrivathsan A       home slot 74
+  slot 78 : 78            Sahana              home slot 78</pre><div class="pn"><a href="notifications.html"><small>Previous</small>Priority notifications</a><a class="r" href="expressions.html"><small>Next</small>Expressions and Tower of Hanoi</a></div></main></div><footer><div class="in">Student Communication System · IT23302 Data Structures Using C · Department of Information Technology, MIT Campus, Anna University<br>Shrivathsan A (2025506074) and Aakash V (2025506138)</div></footer><script src="app.js"></script></body></html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>List, tree, hash and graph helpers | Student Communication System</title><link rel="stylesheet" href="style.css"></head><body>
+<header class="top"><div class="in"><a class="brand" href="index.html"><span>SCS</span>Student Communication System</a><nav><a href="index.html">Home</a><a href="design.html">Design</a><a href="topics.html" class=on>Topics</a><a href="output.html">Output</a><a href="about.html">About</a></nav></div></header><div class="in lay"><aside><b>Topics</b><a href="setup.html">Program setup and structures</a><a href="helpers.html">Input helper functions</a><a href="lookup.html" class=on>List, tree, hash and graph helpers</a><a href="registration.html">Student registration and display</a><a href="searching.html">Searching a student</a><a href="sorting.html">Sorting student records</a><a href="messaging.html">Messaging, chat history and undo</a><a href="group.html">Study group</a><a href="connections.html">Connections and shortest path</a><a href="notifications.html">Priority notifications</a><a href="hashing.html">Hash table search</a><a href="expressions.html">Expressions and Tower of Hanoi</a><a href="main.html">Clean-up and main function</a></aside><main><h1>List, tree, hash and graph helpers</h1><p class="sub">find_student, BST, hash table and graph index</p><div class="meta"><div><small>Data structure</small>Linked list, BST, hash table</div><div><small>Syllabus unit</small>Units II, III, V</div><div><small>Menu option</small>-</div></div><p>Helper functions shared by many features: linear search in the student list, insert, search and inorder traversal of the binary search tree, insert and search of the hash table, and the graph index lookup.</p><h2>Algorithm</h2><h3>6.4 Student Search Using a Binary Search Tree</h3><p>The key is compared with the root and the search moves to the left or right subtree. SEARCH(root, key) 1. If root == NULL, return NOT_FOUND 2. If key == root-&gt;id, return root 3. If key &lt; root-&gt;id return SEARCH(root-&gt;left, key) Else return SEARCH(root-&gt;right, key)</p><pre class="term"></pre><h3>6.7 Hashing Using the Division Method and Linear Probing</h3><p>A colliding key is placed in the next free slot of the table. HASH(key) = key % TABLE_SIZE                      (TABLE_SIZE = 101) INSERT(key) 1. index = HASH(key) 2. While table[index] is occupied index = (index + 1) % TABLE_SIZE 3. table[index] = key SEARCH(key) 1. index = HASH(key) 2. While table[index] is occupied If table[index] == key, return index index = (index + 1) % TABLE_SIZE 3. Return NOT_FOUND</p><pre class="term"></pre><h2>Source code</h2><h3>7.5 Student List, Search Tree, Hash Table and Graph Helpers</h3><div class="cw"><button class="cp">Copy</button><pre class="code"><code>/* Linear search in the linked list. steps returns the comparisons made. */
+static Student *find_student(int id, int *steps)
+{
+    Student *t = head;
+    int count = 0;
+
+    while (t != NULL) {
+        count++;
+        if (t-&gt;id == id)
+            break;
+        t = t-&gt;next;
+    }
+    if (steps != NULL)
+        *steps = count;
+    return t;
+}
+
+static const char *student_name(int id)
+{
+    Student *s = find_student(id, NULL);
+    return s ? s-&gt;name : "Unknown";
+}
+
+/* ---- binary search tree ---- */
+
+static TreeNode *bst_insert(TreeNode *r, Student *s)
+{
+    if (r == NULL) {
+        TreeNode *n = (TreeNode *)safe_malloc(sizeof(TreeNode));
+        n-&gt;id = s-&gt;id;
+        n-&gt;rec = s;
+        n-&gt;left = n-&gt;right = NULL;
+        return n;
+    }
+
+
+
+
+
+    if (s-&gt;id &lt; r-&gt;id)
+         r-&gt;left = bst_insert(r-&gt;left, s);
+    else
+         r-&gt;right = bst_insert(r-&gt;right, s);
+    return r;
+}
+
+static Student *bst_search(int id, int *steps)
+{
+    TreeNode *t = root;
+    int count = 0;
+
+    while (t != NULL) {
+        count++;
+        if (id == t-&gt;id) {
+            *steps = count;
+            return t-&gt;rec;
+        }
+        t = (id &lt; t-&gt;id) ? t-&gt;left : t-&gt;right;
+    }
+    *steps = count;
+    return NULL;
+}
+
+static void bst_inorder(TreeNode *r)
+{
+    if (r == NULL)
+        return;
+    bst_inorder(r-&gt;left);
+    printf(" %-12d %s\n", r-&gt;id, r-&gt;rec-&gt;name);
+    bst_inorder(r-&gt;right);
+}
+
+static void bst_free(TreeNode *r)
+{
+    if (r == NULL)
+        return;
+    bst_free(r-&gt;left);
+    bst_free(r-&gt;right);
+    free(r);
+}
+
+/* ---- hash table (division method, linear probing) ---- */
+
+static int hash_insert(int id)
+{
+    int index = id % TABLE_SIZE;
+    int probes = 1;
+
+    while (hash_table[index] != 0) {
+        index = (index + 1) % TABLE_SIZE;
+        probes++;
+    }
+    hash_table[index] = id;
+    return probes;
+}
+
+static int hash_search(int id, int *probes)
+{
+    int index = id % TABLE_SIZE;
+    int count = 1;
+
+    while (hash_table[index] != 0) {
+        if (hash_table[index] == id) {
+            *probes = count;
+            return index;
+        }
+        index = (index + 1) % TABLE_SIZE;
+        count++;
+
+
+
+
+
+        if (count &gt; TABLE_SIZE)
+            break;
+    }
+    *probes = count;
+    return -1;
+}
+
+/* ---- graph helpers ---- */
+
+static int graph_index(int id)
+{
+    int i;
+    for (i = 0; i &lt; vcount; i++)
+        if (graph_ids[i] == id)
+            return i;
+    return -1;
+}</code></pre></div><div class="pn"><a href="helpers.html"><small>Previous</small>Input helper functions</a><a class="r" href="registration.html"><small>Next</small>Student registration and display</a></div></main></div><footer><div class="in">Student Communication System · IT23302 Data Structures Using C · Department of Information Technology, MIT Campus, Anna University<br>Shrivathsan A (2025506074) and Aakash V (2025506138)</div></footer><script src="app.js"></script></body></html>

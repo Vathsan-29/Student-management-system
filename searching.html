@@ -1,0 +1,127 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Searching a student | Student Communication System</title><link rel="stylesheet" href="style.css"></head><body>
+<header class="top"><div class="in"><a class="brand" href="index.html"><span>SCS</span>Student Communication System</a><nav><a href="index.html">Home</a><a href="design.html">Design</a><a href="topics.html" class=on>Topics</a><a href="output.html">Output</a><a href="about.html">About</a></nav></div></header><div class="in lay"><aside><b>Topics</b><a href="setup.html">Program setup and structures</a><a href="helpers.html">Input helper functions</a><a href="lookup.html">List, tree, hash and graph helpers</a><a href="registration.html">Student registration and display</a><a href="searching.html" class=on>Searching a student</a><a href="sorting.html">Sorting student records</a><a href="messaging.html">Messaging, chat history and undo</a><a href="group.html">Study group</a><a href="connections.html">Connections and shortest path</a><a href="notifications.html">Priority notifications</a><a href="hashing.html">Hash table search</a><a href="expressions.html">Expressions and Tower of Hanoi</a><a href="main.html">Clean-up and main function</a></aside><main><h1>Searching a student</h1><p class="sub">Linear, binary and BST search</p><div class="meta"><div><small>Data structure</small>Array, list and BST</div><div><small>Syllabus unit</small>Units I, II, III</div><div><small>Menu option</small>3</div></div><p>The same student can be found three ways: linear search in the linked list, binary search in a sorted copy of the IDs, and search in the binary search tree. The program shows how many comparisons each one made.</p><h2>Algorithm</h2><h3>6.4 Student Search Using a Binary Search Tree</h3><p>The key is compared with the root and the search moves to the left or right subtree. SEARCH(root, key) 1. If root == NULL, return NOT_FOUND 2. If key == root-&gt;id, return root 3. If key &lt; root-&gt;id return SEARCH(root-&gt;left, key) Else return SEARCH(root-&gt;right, key)</p><pre class="term"></pre><h2>Source code</h2><h3>7.8 Search Student (Option 3)</h3><div class="cw"><button class="cp">Copy</button><pre class="code"><code>static void print_student(Student *s)
+{
+    printf(" ID: %d | Name: %s | Department: %s | Year: %d\n",
+           s-&gt;id, s-&gt;name, s-&gt;dept, s-&gt;year);
+}
+
+static void search_student(void)
+{
+    int choice, id, steps = 0;
+    Student *s = NULL;
+
+    printf("\n 1. Linear search (linked list)\n");
+    printf(" 2. Binary search (sorted array)\n");
+    printf(" 3. Binary search tree\n");
+    printf(" 4. Show all IDs in sorted order (BST inorder)\n");
+    choice = read_int("Enter your choice: ");
+
+    if (choice == 4) {
+        if (root == NULL)
+            printf("No students registered yet.\n");
+        else {
+            printf(" %-12s %s\n", "ID", "NAME");
+            bst_inorder(root);
+        }
+        return;
+    }
+    if (choice &lt; 1 || choice &gt; 3) {
+        printf("Invalid choice.\n");
+        return;
+    }
+    if (head == NULL) {
+        printf("No students registered yet.\n");
+        return;
+    }
+
+
+
+
+
+    id = read_int("Enter student ID to search: ");
+
+    if (choice == 1) {
+        s = find_student(id, &amp;steps);
+    } else if (choice == 2) {
+        int ids[MAX_STUDENTS], n = 0, i, j, key, low, high, mid;
+        Student *t;
+
+        for (t = head; t != NULL; t = t-&gt;next)       /* copy IDs */
+             ids[n++] = t-&gt;id;
+        for (i = 1; i &lt; n; i++) {                    /* insertion sort */
+             key = ids[i];
+             j = i - 1;
+             while (j &gt;= 0 &amp;&amp; ids[j] &gt; key) {
+                 ids[j + 1] = ids[j];
+                 j--;
+             }
+             ids[j + 1] = key;
+        }
+        low = 0;
+        high = n - 1;
+        while (low &lt;= high) {                        /* binary search */
+             mid = (low + high) / 2;
+             steps++;
+             if (ids[mid] == id) {
+                 s = find_student(id, NULL);
+                 break;
+             } else if (ids[mid] &lt; id) {
+                 low = mid + 1;
+             } else {
+                 high = mid - 1;
+             }
+        }
+    } else {
+        s = bst_search(id, &amp;steps);
+    }
+
+    if (s != NULL) {
+        printf("Student found after %d comparison(s):\n", steps);
+        print_student(s);
+    } else {
+        printf("Record not found (%d comparison(s) made).\n", steps);
+    }
+}</code></pre></div><h2>Sample output</h2><h3>Output 3: Searching a student (linear, binary and BST)</h3><p>The same kind of search done in three ways. The number of comparisons is shown each time.</p><pre class="term">Enter your choice: 3
+
+  1. Linear search (linked list)
+  2. Binary search (sorted array)
+  3. Binary search tree
+  4. Show all IDs in sorted order (BST inorder)
+Enter your choice: 1
+Enter student ID to search: 202
+Student found after 2 comparison(s):
+  ID: 202 | Name: Arun S | Department: Information Technology | Year: 2
+
+Enter your choice: 3
+
+  1. Linear search (linked list)
+  2. Binary search (sorted array)
+  3. Binary search tree
+  4. Show all IDs in sorted order (BST inorder)
+Enter your choice: 2
+Enter student ID to search: 138
+Student found after 3 comparison(s):
+  ID: 138 | Name: Aakash V | Department: Information Technology | Year: 2
+
+Enter your choice: 3
+
+  1. Linear search (linked list)
+  2. Binary search (sorted array)
+  3. Binary search tree
+  4. Show all IDs in sorted order (BST inorder)
+Enter your choice: 3
+Enter student ID to search: 999
+Record not found (3 comparison(s) made).
+
+Enter your choice: 3
+
+  1. Linear search (linked list)
+  2. Binary search (sorted array)
+  3. Binary search tree
+  4. Show all IDs in sorted order (BST inorder)
+Enter your choice: 4
+  ID           NAME
+  78           Sahana
+  202          Arun S
+  74           Shrivathsan A
+  138          Aakash V</pre><div class="pn"><a href="registration.html"><small>Previous</small>Student registration and display</a><a class="r" href="sorting.html"><small>Next</small>Sorting student records</a></div></main></div><footer><div class="in">Student Communication System · IT23302 Data Structures Using C · Department of Information Technology, MIT Campus, Anna University<br>Shrivathsan A (2025506074) and Aakash V (2025506138)</div></footer><script src="app.js"></script></body></html>

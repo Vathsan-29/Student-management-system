@@ -1,0 +1,64 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Input helper functions | Student Communication System</title><link rel="stylesheet" href="style.css"></head><body>
+<header class="top"><div class="in"><a class="brand" href="index.html"><span>SCS</span>Student Communication System</a><nav><a href="index.html">Home</a><a href="design.html">Design</a><a href="topics.html" class=on>Topics</a><a href="output.html">Output</a><a href="about.html">About</a></nav></div></header><div class="in lay"><aside><b>Topics</b><a href="setup.html">Program setup and structures</a><a href="helpers.html" class=on>Input helper functions</a><a href="lookup.html">List, tree, hash and graph helpers</a><a href="registration.html">Student registration and display</a><a href="searching.html">Searching a student</a><a href="sorting.html">Sorting student records</a><a href="messaging.html">Messaging, chat history and undo</a><a href="group.html">Study group</a><a href="connections.html">Connections and shortest path</a><a href="notifications.html">Priority notifications</a><a href="hashing.html">Hash table search</a><a href="expressions.html">Expressions and Tower of Hanoi</a><a href="main.html">Clean-up and main function</a></aside><main><h1>Input helper functions</h1><p class="sub">Safe input and memory helpers</p><div class="meta"><div><small>Data structure</small>Helpers</div><div><small>Syllabus unit</small>Setup</div><div><small>Menu option</small>-</div></div><p>These small functions keep the program safe. read_int rejects letters, read_line removes the newline, name_compare ignores case and safe_malloc stops the program if memory runs out.</p><h2>Source code</h2><h3>7.4 Input Helper Functions</h3><div class="cw"><button class="cp">Copy</button><pre class="code"><code>static void read_line(const char *prompt, char *buf, int size)
+{
+    printf("%s", prompt);
+    if (fgets(buf, size, stdin) == NULL) {
+        buf[0] = '\0';
+        return;
+    }
+    buf[strcspn(buf, "\n")] = '\0';
+}
+
+static int read_int(const char *prompt)
+{
+    char line[64];
+    char *end;
+    long long v;
+
+    while (1) {
+        printf("%s", prompt);
+        if (fgets(line, sizeof line, stdin) == NULL)
+            exit(0);                        /* end of input */
+        v = strtoll(line, &amp;end, 10);
+        if (end != line &amp;&amp; (*end == '\n' || *end == '\0') &amp;&amp;
+            v &gt;= INT_MIN &amp;&amp; v &lt;= INT_MAX)
+            return (int)v;
+        printf("Please enter a valid number.\n");
+    }
+
+
+
+
+
+}
+
+static int name_compare(const char *a, const char *b)   /* ignores case */
+{
+    while (*a &amp;&amp; *b) {
+        int x = tolower((unsigned char)*a);
+        int y = tolower((unsigned char)*b);
+        if (x != y)
+             return x - y;
+        a++;
+        b++;
+    }
+    return tolower((unsigned char)*a) - tolower((unsigned char)*b);
+}
+
+static void line(char ch, int n)
+{
+    int i;
+    for (i = 0; i &lt; n; i++)
+        putchar(ch);
+    putchar('\n');
+}
+
+static void *safe_malloc(size_t size)
+{
+    void *p = malloc(size);
+    if (p == NULL) {
+        printf("Memory allocation failed.\n");
+        exit(1);
+    }
+    return p;
+}</code></pre></div><div class="pn"><a href="setup.html"><small>Previous</small>Program setup and structures</a><a class="r" href="lookup.html"><small>Next</small>List, tree, hash and graph helpers</a></div></main></div><footer><div class="in">Student Communication System · IT23302 Data Structures Using C · Department of Information Technology, MIT Campus, Anna University<br>Shrivathsan A (2025506074) and Aakash V (2025506138)</div></footer><script src="app.js"></script></body></html>

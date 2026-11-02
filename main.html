@@ -1,0 +1,80 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Clean-up and main function | Student Communication System</title><link rel="stylesheet" href="style.css"></head><body>
+<header class="top"><div class="in"><a class="brand" href="index.html"><span>SCS</span>Student Communication System</a><nav><a href="index.html">Home</a><a href="design.html">Design</a><a href="topics.html" class=on>Topics</a><a href="output.html">Output</a><a href="about.html">About</a></nav></div></header><div class="in lay"><aside><b>Topics</b><a href="setup.html">Program setup and structures</a><a href="helpers.html">Input helper functions</a><a href="lookup.html">List, tree, hash and graph helpers</a><a href="registration.html">Student registration and display</a><a href="searching.html">Searching a student</a><a href="sorting.html">Sorting student records</a><a href="messaging.html">Messaging, chat history and undo</a><a href="group.html">Study group</a><a href="connections.html">Connections and shortest path</a><a href="notifications.html">Priority notifications</a><a href="hashing.html">Hash table search</a><a href="expressions.html">Expressions and Tower of Hanoi</a><a href="main.html" class=on>Clean-up and main function</a></aside><main><h1>Clean-up and main function</h1><p class="sub">free_all, menu and main loop</p><div class="meta"><div><small>Data structure</small>All structures</div><div><small>Syllabus unit</small>Setup</div><div><small>Menu option</small>0</div></div><p>free_all releases every list and the tree before the program ends. main shows the menu and calls the matching function for each option.</p><h2>Source code</h2><h3>7.16 Memory Clean-up and Main Function</h3><div class="cw"><button class="cp">Copy</button><pre class="code"><code>static void free_all(void)
+{
+    Student *s;
+    Message *m;
+    Chat *c;
+    UndoNode *u;
+    Member *g, *start;
+
+    while (head != NULL) { s = head; head = head-&gt;next; free(s); }
+    bst_free(root);
+    while (q_front != NULL) { m = q_front; q_front = q_front-&gt;next; free(m); }
+    while (chat_head != NULL) { c = chat_head; chat_head = chat_head-&gt;next; free(c); }
+    while (undo_top != NULL) { u = undo_top; undo_top = undo_top-&gt;next; free(u); }
+    if (group_last != NULL) {
+        start = group_last-&gt;next;
+        group_last-&gt;next = NULL;            /* break the circle */
+        while (start != NULL) { g = start; start = start-&gt;next; free(g); }
+    }
+}
+
+static void show_menu(void)
+{
+
+
+
+
+
+    printf("\n");
+    line('=', 40);
+    printf("      STUDENT COMMUNICATION SYSTEM\n");
+    line('=', 40);
+    printf(" 1. Student Registration\n");
+    printf(" 2. Display Student Details\n");
+    printf(" 3. Search Student\n");
+    printf(" 4. Sort Student Records\n");
+    printf(" 5. Send Message\n");
+    printf(" 6. View Incoming Messages\n");
+    printf(" 7. View Chat History\n");
+    printf(" 8. Undo Recent Message\n");
+    printf(" 9. Manage Student Groups\n");
+    printf("10. Student Connections\n");
+    printf("11. Find Connection Path\n");
+    printf("12. Priority Notifications\n");
+    printf("13. Hash Table Search\n");
+    printf("14. Stack / Expression Demonstration\n");
+    printf(" 0. Exit\n");
+    line('-', 40);
+}
+
+int main(void)
+{
+    int choice;
+
+    do {
+        show_menu();
+        choice = read_int("Enter your choice: ");
+        switch (choice) {
+            case 1: register_student();        break;
+            case 2: display_students();        break;
+            case 3: search_student();          break;
+            case 4: sort_students();           break;
+            case 5: send_message();            break;
+            case 6: view_incoming();           break;
+            case 7: view_chat_history();       break;
+            case 8: undo_message();            break;
+            case 9: manage_group();            break;
+            case 10: manage_connections();     break;
+            case 11: find_connection_path();   break;
+            case 12: manage_notifications();   break;
+            case 13: hash_menu();              break;
+            case 14: stack_demo();             break;
+            case 0: printf("Thank you for using the system.\n"); break;
+            default: printf("Invalid choice. Please try again.\n");
+        }
+    } while (choice != 0);
+
+    free_all();
+    return 0;
+}</code></pre></div><div class="pn"><a href="expressions.html"><small>Previous</small>Expressions and Tower of Hanoi</a></div></main></div><footer><div class="in">Student Communication System · IT23302 Data Structures Using C · Department of Information Technology, MIT Campus, Anna University<br>Shrivathsan A (2025506074) and Aakash V (2025506138)</div></footer><script src="app.js"></script></body></html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Study group | Student Communication System</title><link rel="stylesheet" href="style.css"></head><body>
+<header class="top"><div class="in"><a class="brand" href="index.html"><span>SCS</span>Student Communication System</a><nav><a href="index.html">Home</a><a href="design.html">Design</a><a href="topics.html" class=on>Topics</a><a href="output.html">Output</a><a href="about.html">About</a></nav></div></header><div class="in lay"><aside><b>Topics</b><a href="setup.html">Program setup and structures</a><a href="helpers.html">Input helper functions</a><a href="lookup.html">List, tree, hash and graph helpers</a><a href="registration.html">Student registration and display</a><a href="searching.html">Searching a student</a><a href="sorting.html">Sorting student records</a><a href="messaging.html">Messaging, chat history and undo</a><a href="group.html" class=on>Study group</a><a href="connections.html">Connections and shortest path</a><a href="notifications.html">Priority notifications</a><a href="hashing.html">Hash table search</a><a href="expressions.html">Expressions and Tower of Hanoi</a><a href="main.html">Clean-up and main function</a></aside><main><h1>Study group</h1><p class="sub">Circular linked list</p><div class="meta"><div><small>Data structure</small>Circular linked list</div><div><small>Syllabus unit</small>Unit II</div><div><small>Menu option</small>9</div></div><p>Group members sit in a circular linked list. The current speaker moves to the next member and wraps round to the start, and removing the speaker passes the turn on.</p><h2>Source code</h2><h3>7.11 Student Group (Option 9)</h3><div class="cw"><button class="cp">Copy</button><pre class="code"><code>static int in_group(int id)
+{
+    Member *p;
+    if (group_last == NULL)
+         return 0;
+    p = group_last-&gt;next;
+    do {
+         if (p-&gt;id == id)
+             return 1;
+         p = p-&gt;next;
+    } while (p != group_last-&gt;next);
+    return 0;
+}
+
+static void manage_group(void)
+{
+    int choice, id;
+    Member *n, *p, *prev;
+
+
+
+
+
+   printf("\n 1. Add a member\n 2. Remove a member\n");
+   printf(" 3. Show group members\n 4. Pass turn to next speaker\n");
+   choice = read_int("Enter your choice: ");
+
+   if (choice == 1) {
+       id = read_int("Enter student ID to add: ");
+       if (find_student(id, NULL) == NULL) {
+            printf("Student is not registered.\n");
+       } else if (in_group(id)) {
+            printf("Student is already in the group.\n");
+       } else {
+            n = (Member *)safe_malloc(sizeof(Member));
+            n-&gt;id = id;
+            if (group_last == NULL) {
+                n-&gt;next = n;
+                group_last = group_cur = n;
+            } else {
+                n-&gt;next = group_last-&gt;next;
+                group_last-&gt;next = n;
+                group_last = n;
+            }
+            printf("%s added to the group.\n", student_name(id));
+       }
+   } else if (choice == 2) {
+       if (group_last == NULL) {
+            printf("The group is empty.\n");
+            return;
+       }
+       id = read_int("Enter student ID to remove: ");
+       prev = group_last;
+       p = group_last-&gt;next;
+       do {
+            if (p-&gt;id == id)
+                break;
+            prev = p;
+            p = p-&gt;next;
+       } while (prev != group_last);
+
+       if (p-&gt;id != id) {
+            printf("Student is not in the group.\n");
+            return;
+       }
+       if (p-&gt;next == p) {                   /* only one member */
+            group_last = group_cur = NULL;
+       } else {
+            prev-&gt;next = p-&gt;next;
+            if (p == group_last)
+                group_last = prev;
+            if (p == group_cur)
+                group_cur = p-&gt;next;
+       }
+       free(p);
+       printf("Member removed from the group.\n");
+   } else if (choice == 3) {
+       if (group_last == NULL) {
+            printf("The group is empty.\n");
+            return;
+       }
+       p = group_last-&gt;next;
+       do {
+            printf(" %d %s%s\n", p-&gt;id, student_name(p-&gt;id),
+                    (p == group_cur) ? "   &lt;-- current speaker" : "");
+            p = p-&gt;next;
+       } while (p != group_last-&gt;next);
+   } else if (choice == 4) {
+       if (group_cur == NULL) {
+            printf("The group is empty.\n");
+            return;
+       }
+
+
+
+
+
+        group_cur = group_cur-&gt;next;
+        printf("It is now %s's turn to speak.\n", student_name(group_cur-&gt;id));
+    } else {
+        printf("Invalid choice.\n");
+    }
+}</code></pre></div><h2>Sample output</h2><h3>Output 7: Study group using a circular linked list</h3><p>The study group is a circular list. The current speaker moves to the next member, and removing the speaker passes the turn on.</p><pre class="term">Enter your choice: 9
+
+  1. Add a member
+  2. Remove a member
+  3. Show group members
+  4. Pass turn to next speaker
+Enter your choice: 1
+Enter student ID to add: 78
+Sahana added to the group.
+
+Enter your choice: 9
+
+  1. Add a member
+  2. Remove a member
+  3. Show group members
+  4. Pass turn to next speaker
+Enter your choice: 1
+Enter student ID to add: 202
+Arun S added to the group.
+
+Enter your choice: 9
+
+  1. Add a member
+  2. Remove a member
+  3. Show group members
+  4. Pass turn to next speaker
+Enter your choice: 1
+Enter student ID to add: 74
+Shrivathsan A added to the group.
+
+Enter your choice: 9
+
+  1. Add a member
+  2. Remove a member
+  3. Show group members
+  4. Pass turn to next speaker
+Enter your choice: 3
+  78   Sahana     &lt;-- current speaker
+  202 Arun S
+  74          Shrivathsan A
+
+Enter your choice: 9
+
+  1. Add a member
+  2. Remove a member
+  3. Show group members
+  4. Pass turn to next speaker
+Enter your choice: 4
+It is now Arun S's turn to speak.
+
+Enter your choice: 9
+
+  1. Add a member
+  2. Remove a member
+  3. Show group members
+  4. Pass turn to next speaker
+Enter your choice: 2
+Enter student ID to remove: 202
+Member removed from the group.
+
+Enter your choice: 9
+
+  1. Add a member
+  2. Remove a member
+
+
+
+
+
+  3. Show group members
+  4. Pass turn to next speaker
+Enter your choice: 3
+  78   Sahana
+  74          Shrivathsan A    &lt;-- current speaker</pre><div class="pn"><a href="messaging.html"><small>Previous</small>Messaging, chat history and undo</a><a class="r" href="connections.html"><small>Next</small>Connections and shortest path</a></div></main></div><footer><div class="in">Student Communication System · IT23302 Data Structures Using C · Department of Information Technology, MIT Campus, Anna University<br>Shrivathsan A (2025506074) and Aakash V (2025506138)</div></footer><script src="app.js"></script></body></html>

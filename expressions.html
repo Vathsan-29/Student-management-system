@@ -1,0 +1,179 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Expressions and Tower of Hanoi | Student Communication System</title><link rel="stylesheet" href="style.css"></head><body>
+<header class="top"><div class="in"><a class="brand" href="index.html"><span>SCS</span>Student Communication System</a><nav><a href="index.html">Home</a><a href="design.html">Design</a><a href="topics.html" class=on>Topics</a><a href="output.html">Output</a><a href="about.html">About</a></nav></div></header><div class="in lay"><aside><b>Topics</b><a href="setup.html">Program setup and structures</a><a href="helpers.html">Input helper functions</a><a href="lookup.html">List, tree, hash and graph helpers</a><a href="registration.html">Student registration and display</a><a href="searching.html">Searching a student</a><a href="sorting.html">Sorting student records</a><a href="messaging.html">Messaging, chat history and undo</a><a href="group.html">Study group</a><a href="connections.html">Connections and shortest path</a><a href="notifications.html">Priority notifications</a><a href="hashing.html">Hash table search</a><a href="expressions.html" class=on>Expressions and Tower of Hanoi</a><a href="main.html">Clean-up and main function</a></aside><main><h1>Expressions and Tower of Hanoi</h1><p class="sub">Array stack and recursion</p><div class="meta"><div><small>Data structure</small>Stack (array), recursion</div><div><small>Syllabus unit</small>Unit II</div><div><small>Menu option</small>14</div></div><p>An array stack converts an infix expression to postfix and evaluates it, with checks for wrong expressions and division by zero. Recursion solves the Tower of Hanoi.</p><h2>Algorithm</h2><h3>6.8 Infix to Postfix Conversion</h3><p>A stack holds the operators until their turn to be written to the output. TO_POSTFIX(infix) 1. Create an empty stack 2. For each character c of the expression If c is a digit            : add c to the output If c is '('                : push c If c is ')'                : pop to the output until '(' is found If c is + - * /            : while the top has equal or higher precedence, pop it to the output; then push c 3. Pop all remaining operators to the output</p><pre class="term"></pre><h2>Source code</h2><h3>7.15 Stack and Expression Demonstration (Option 14)</h3><div class="cw"><button class="cp">Copy</button><pre class="code"><code>static int precedence(char op)
+{
+    if (op == '+' || op == '-')
+        return 1;
+    if (op == '*' || op == '/')
+        return 2;
+    return 0;
+}
+
+static int to_postfix(const char *infix, char *postfix)
+{
+
+
+
+
+
+    char stack[EXPR_MAX];
+    int top = -1, k = 0, i;
+    char c;
+
+    for (i = 0; infix[i] != '\0'; i++) {
+        c = infix[i];
+        if (c == ' ')
+            continue;
+        if (isdigit((unsigned char)c)) {
+            postfix[k++] = c;
+        } else if (c == '(') {
+            stack[++top] = c;
+        } else if (c == ')') {
+            while (top &gt;= 0 &amp;&amp; stack[top] != '(')
+                 postfix[k++] = stack[top--];
+            if (top &lt; 0)
+                 return 0;                    /* missing '(' */
+            top--;                            /* discard '(' */
+        } else if (c == '+' || c == '-' || c == '*' || c == '/') {
+            while (top &gt;= 0 &amp;&amp; precedence(stack[top]) &gt;= precedence(c))
+                 postfix[k++] = stack[top--];
+            stack[++top] = c;
+        } else {
+            return 0;                         /* illegal character */
+        }
+    }
+    while (top &gt;= 0) {
+        if (stack[top] == '(')
+            return 0;                         /* missing ')' */
+        postfix[k++] = stack[top--];
+    }
+    postfix[k] = '\0';
+    return 1;
+}
+
+static int eval_postfix(const char *postfix, int *result)
+{
+    int stack[EXPR_MAX], top = -1, i, a, b;
+    char c;
+
+    for (i = 0; postfix[i] != '\0'; i++) {
+        c = postfix[i];
+        if (isdigit((unsigned char)c)) {
+            stack[++top] = c - '0';
+        } else {
+            if (top &lt; 1)
+                 return 0;                   /* not enough operands */
+            b = stack[top--];
+            a = stack[top--];
+            if (c == '+')
+                 stack[++top] = a + b;
+            else if (c == '-')
+                 stack[++top] = a - b;
+            else if (c == '*')
+                 stack[++top] = a * b;
+            else {
+                 if (b == 0)
+                     return -1;              /* division by zero */
+                 stack[++top] = a / b;
+            }
+        }
+    }
+    if (top != 0)
+        return 0;
+    *result = stack[top];
+    return 1;
+}
+
+static void hanoi(int n, char from, char to, char via)
+
+
+
+
+
+{
+    if (n == 0)
+        return;
+    hanoi(n - 1, from, via, to);
+    printf(" Move disk %d from %c to %c\n", n, from, to);
+    hanoi(n - 1, via, to, from);
+}
+
+static void stack_demo(void)
+{
+    int choice, n, result, status;
+    char infix[EXPR_MAX], postfix[EXPR_MAX];
+
+    printf("\n 1. Infix to postfix, then evaluate\n");
+    printf(" 2. Tower of Hanoi\n");
+    choice = read_int("Enter your choice: ");
+
+    if (choice == 1) {
+        read_line("Enter infix expression (single-digit numbers, + - * / and brackets): ",
+                   infix, sizeof infix);
+        if (!to_postfix(infix, postfix)) {
+             printf("Invalid expression.\n");
+             return;
+        }
+        printf("Postfix expression : %s\n", postfix);
+        status = eval_postfix(postfix, &amp;result);
+        if (status == 1)
+             printf("Value               : %d\n", result);
+        else if (status == -1)
+             printf("Division by zero.\n");
+        else
+             printf("Invalid expression.\n");
+    } else if (choice == 2) {
+        n = read_int("Number of disks (1-6): ");
+        if (n &lt; 1 || n &gt; 6) {
+             printf("Please enter a value from 1 to 6.\n");
+             return;
+        }
+        hanoi(n, 'A', 'C', 'B');
+        printf("Total moves: %d\n", (1 &lt;&lt; n) - 1);
+    } else {
+        printf("Invalid choice.\n");
+    }
+}</code></pre></div><h2>Sample output</h2><h3>Output 11: Postfix conversion, evaluation and Tower of Hanoi</h3><p>An infix expression is converted to postfix and evaluated. A division by zero and a wrong expression are handled, and the Tower of Hanoi is solved for three disks.</p><pre class="term">Enter your choice: 14
+
+  1. Infix to postfix, then evaluate
+  2. Tower of Hanoi
+Enter your choice: 1
+Enter infix expression (single-digit numbers, + - * / and brackets): (3+4)*5-6/2
+Postfix expression : 34+5*62/-
+Value               : 32
+
+Enter your choice: 14
+
+  1. Infix to postfix, then evaluate
+  2. Tower of Hanoi
+Enter your choice: 1
+Enter infix expression (single-digit numbers, + - * / and brackets): 8/(4-4)
+Postfix expression : 844-/
+Division by zero.
+
+Enter your choice: 14
+
+
+
+
+
+  1. Infix to postfix, then evaluate
+  2. Tower of Hanoi
+Enter your choice: 1
+Enter infix expression (single-digit numbers, + - * / and brackets): 3++
+Postfix expression : 3++
+Invalid expression.
+
+Enter your choice: 14
+
+  1. Infix to postfix, then evaluate
+  2. Tower of Hanoi
+Enter your choice: 2
+Number of disks (1-6): 3
+  Move disk 1 from A to C
+  Move disk 2 from A to B
+  Move disk 1 from C to B
+  Move disk 3 from A to C
+  Move disk 1 from B to A
+  Move disk 2 from B to C
+  Move disk 1 from A to C
+Total moves: 7</pre><div class="pn"><a href="hashing.html"><small>Previous</small>Hash table search</a><a class="r" href="main.html"><small>Next</small>Clean-up and main function</a></div></main></div><footer><div class="in">Student Communication System · IT23302 Data Structures Using C · Department of Information Technology, MIT Campus, Anna University<br>Shrivathsan A (2025506074) and Aakash V (2025506138)</div></footer><script src="app.js"></script></body></html>
